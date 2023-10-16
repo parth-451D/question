@@ -22,12 +22,16 @@ const QuestionList = () => {
   const [open, setOpen] = useState(false);
 
   const onOpenModal = () => setOpen(true);
-  const onCloseModal = () => setOpen(false);
+  const onCloseModal = () => {
+    setOpen(false);
+    setIsOptions(false);
+  };
 
   const [editopen, setEditOpen] = useState(false);
 
   const onEditOpenModal = () => setEditOpen(true);
   const onCloseEditModal = () => setEditOpen(false);
+
   const [selectedValue, setSelectedValue] = useState(""); // State for the selected dropdown value
 
   // Function to handle the dropdown value change
@@ -67,46 +71,38 @@ const QuestionList = () => {
         });
       }
       getQuestionListData();
+      setError("");
     } catch (error) {
       console.log(error);
       setError(error.response.data.error.code);
     }
   };
 
-  const validationSchema = (optionType) => { Yup.object().shape({
-    questionName: Yup.string().required("Question is required"),
-    questionType: Yup.string().required("Question type is required"),
-    questionSequence: Yup.number()
-      .required("Question sequence is required")
-      .positive()
-      .integer(),
-    questionOptions: optionType ? Yup.array()
-      .of(Yup.string())
-      .test(
-        "at-least-one-option",
-        "At least one option is required",
-        function (value) {
-          // Check if value is an array and at least one option is non-empty
-          return (
-            Array.isArray(value) &&
-            value.some((option) => option && option.trim() !== "")
-          );
-        }
-      ) : Yup.array()
-      .of(Yup.string())
-      .test(
-        "at-least-one-option",
-        "At least one option is required",
-        function (value) {
-          // Check if value is an array and at least one option is non-empty
-          return (
-            Array.isArray(value) &&
-            value.some((option) => option && option.trim() !== "")
-          );
-        }
-      )
-  });
-}
+  const validationSchema = (optionType) => {
+    return Yup.object().shape({
+      questionName: Yup.string().required("Question is required"),
+      questionType: Yup.string().required("Question type is required"),
+      questionSequence: Yup.number()
+        .required("Question sequence is required")
+        .positive()
+        .integer(),
+      questionOptions: optionType
+        ? Yup.array()
+            .of(Yup.string())
+            .test(
+              "at-least-one-option",
+              "At least one option is required",
+              function (value) {
+                // Check if value is an array and at least one option is non-empty
+                return (
+                  Array.isArray(value) &&
+                  value.some((option) => option && option.trim() !== "")
+                );
+              }
+            )
+        : Yup.array().of(Yup.string()),
+    });
+  };
 
   const handleDelete = (_id) => {
     Swal.fire({
@@ -211,6 +207,7 @@ const QuestionList = () => {
                 /* and other goodies */
               }) => (
                 <form>
+                  {console.log(errors, "error")}
                   <div class="form-group">
                     <label className="mb-1">Question</label>
                     <input
@@ -268,7 +265,7 @@ const QuestionList = () => {
                                 type="text"
                                 name={`questionOptions[${index}]`}
                                 className="form-control mt-2"
-                                placeholder="Enter Option with Comma separated"
+                                placeholder="Enter Option"
                               />
                               {index === 0 ? (
                                 <button
@@ -410,7 +407,7 @@ const QuestionList = () => {
           <h2>Add Question</h2>
           <Formik
             initialValues={editData}
-            validationSchema={validationSchema}
+            validationSchema={validationSchema(isOptions)}
             onSubmit={(values) => {
               updateQuestion(values);
             }}
@@ -484,7 +481,7 @@ const QuestionList = () => {
                               type="text"
                               name={`questionOptions[${index}]`}
                               className="form-control mt-2"
-                              placeholder="Enter Option with Comma separated"
+                              placeholder="Enter Option "
                             />
                             {index === 0 ? (
                               <button

@@ -18,17 +18,14 @@ const PaperPage = () => {
   }, []);
   return (
     <div>
-      fdgszvsdgsd
       {questionList &&
-  questionList.map((ele, idx) => {
-    console.log("1", ele);
-    if (ele.questionType === "Checkbox") {
-      console.log("2");
-      return <Checkbox optionList={ele.questionOptions} key={idx} />;
-    }
-    return null; // Make sure to return something from map
-  })}
-
+        questionList.map((ele, idx) => {
+          if (ele.questionType === "Checkbox") {
+            console.log("2");
+            return <Checkbox optionList={ele.questionOptions} key={idx} />;
+          }
+          return null; // Make sure to return something from map
+        })}
     </div>
   );
 };

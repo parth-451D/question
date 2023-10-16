@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Form } from "react-bootstrap";
 
 const Checkbox = (props) => {
-  console.log("object");
   const [answer, setAnswer] = useState([]);
   const [shuffledOptions, setShuffledOptions] = useState([]);
 
@@ -10,55 +9,44 @@ const Checkbox = (props) => {
     // Shuffle the options array when it changes
     const shuffled = props.optionList.sort(() => Math.random() - 0.5);
     setShuffledOptions(shuffled);
+
+    // Load existing answers from localStorage or initialize an empty array
+    const storedAnswers = JSON.parse(localStorage.getItem("answerList")) || [];
+    setAnswer(storedAnswers);
   }, [props.optionList]);
 
-  const handleChange = (event, index) => {
-    const isChecked = event.target.checked;
+  const handleCheckChange = (ele, isChecked) => {
+    let updatedAnswers = [...answer];
 
     if (isChecked) {
-      // Add the selected option to the answer state
-      setAnswer((prevAnswer) => [...prevAnswer, shuffledOptions[index]]);
+      updatedAnswers.push(ele);
     } else {
-      // Remove the deselected option from the answer state
-      setAnswer((prevAnswer) => prevAnswer.filter((item, i) => i !== index));
+      updatedAnswers = updatedAnswers.filter((item) => item !== ele);
     }
-  };
 
-  const handleCheckChange = (e, ele) => {
-    const oldArr = localStorage.getItem("answerList")
-    if (answer && answer.includes(ele)) {
-      answer.splice(e.target.checked, 1);
-    } else {
-      answer.push(e.target.checked);
-    }
-    const index = oldArr?.findIndex((item) => item.id === props._id);
-    if (index !== -1) {
-        // If the object with the id exists, update the ans property
-        oldArr[index].answer = answer;
-      } else {
-        // If the object with the id doesn't exist, add a new object
-        oldArr.push({ id: props._id, answer: answer });
-      }
-    localStorage.setItem("answerList", oldArr)
-  };
+    // Update the answer state
+    setAnswer(updatedAnswers);
 
-  console.log(localStorage.getItem("answerList"))
+    // Store the updated array in localStorage
+    localStorage.setItem("answerList", JSON.stringify(updatedAnswers));
+  };
 
   return (
     <div>
-      {props &&
-        props.optionList.map((ele, idx) => {
-          return (
-            <Form.Check
-              key={idx}
-              type="checkbox"
-              id="checkbox"
-              label={ele}
-              checked={answer && answer.includes(answer[idx])}
-              onChange={(event) => handleCheckChange(event, ele)}
-            />
-          );
-        })}
+      {shuffledOptions.map((ele, idx) => {
+        const isChecked = answer.includes(ele);
+
+        return (
+          <Form.Check
+            key={idx}
+            type="checkbox"
+            id={`checkbox-${idx}`}
+            label={ele}
+            checked={isChecked}
+            onChange={() => handleCheckChange(ele, !isChecked)}
+          />
+        );
+      })}
     </div>
   );
 };

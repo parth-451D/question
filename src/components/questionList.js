@@ -443,6 +443,7 @@ const QuestionList = () => {
                   <div class="custom-select">
                     <select
                       name=""
+                      value={values.questionType}
                       onChange={(e) => {
                         setIsOptions(false);
                         setQuestionOptions("");
